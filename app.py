@@ -1,8 +1,8 @@
 from flask import Flask, render_template, redirect, request, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, PasswordField, SubmitField, DateField
-from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user
+from wtforms import StringField, EmailField, PasswordField, SubmitField, DateField , SelectField
+from flask_login import LoginManager, UserMixin, login_user, current_user, login_required, logout_user 
 
 app = Flask (__name__) # create server
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///database.db'
@@ -18,19 +18,24 @@ class LoginForm(FlaskForm):
     password= PasswordField()
     submit=SubmitField('Logueate!')
 
-#Registro
+#Formularios
 class RegisterForm(FlaskForm):
     name = StringField('name')
     email=EmailField('email')
     password=PasswordField('pass')
     submit=SubmitField('Registrate!')
 
-#Cramos una tabla
-class User (UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(80), nullable=False)
-    password = db.Column(db.String(80), nullable=False)
+class DenunciaForm(FlaskForm):
+    fecha = DateField('fecha')
+    categoria = StringField('categoria')
+    institucion = StringField('Institucion')
+    saneamiento = SelectField('Calidad de Saneamiento', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    instalacion_electrica = SelectField('Calidad de Instalacion Electrica', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    agua = SelectField('Calidad del agua', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    infraestructura = SelectField('Calidad de la infraestructura', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    mueblario = SelectField('Calidad del mueblario', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    internet = SelectField('Calidad del internet', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    submit = SubmitField('Enviar')
 
 class InstitucionForm(FlaskForm):
     name = StringField('name')
@@ -38,71 +43,61 @@ class InstitucionForm(FlaskForm):
     ciudad = StringField('ciudad')
     submit = SubmitField('Enviar')
 
+#Modelos
+class User (UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(80), nullable=False)
+
 class Institucion(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     departamento = db.Column(db.String(10), nullable=False)
     ciudad = db.Column(db.String(10), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 class Saneamiento(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
     calificacion = db.Column(db.String(10), nullable=False)
     descripcion = db.Column(db.String(200), nullable=True)
 
 class InstalacionElectrica(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
     calificacion = db.Column(db.String(10), nullable=False)
     descripcion = db.Column(db.String(200), nullable=True)
 
 class Agua(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
     calificacion = db.Column(db.String(10), nullable=False)
     descripcion = db.Column(db.String(200), nullable=True)
 
 class Infraestructura(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
     calificacion = db.Column(db.String(10), nullable=False)
     descripcion = db.Column(db.String(200), nullable=True)
 
 class Mueblario(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
     calificacion = db.Column(db.String(10), nullable=False)
     descripcion = db.Column(db.String(200), nullable=True)
 
 class Internet(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
     calificacion = db.Column(db.String(10), nullable=False)
     descripcion = db.Column(db.String(200), nullable=True)
-
-class DenunciaForm(FlaskForm):
-    fecha = DateField('fecha')
-    categoria = StringField('categoria')
-    institucion = StringField('Institucion')
-    submit = SubmitField('Enviar')
 
 class Denuncias(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  
     fecha = db.Column(db.Date(), nullable=False)
-    intitucion_id = db.Column(db.Integer, db.ForeignKey('Institucion.id'))
-
-# class Category(FlaskForm()):
-#     titulo = StringField('titulo')
-#     calificacion = StringField('calificacion')
-#     descripcion = StringField('descripcion')
-#     submit = SubmitField('Enviar')
-
-# class Category(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     titulo = db.Column(db.String(80), nullable=False)
-#     calificacion = db.Column(db.String(), nullable=False)
-#     descripcion = db.Column(db.String(200), nullable=True)
+    institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
 
 
 #Crea la tablas, tiene que estar bajo las clases.
@@ -122,7 +117,7 @@ def register():
         new_user = User(name=form.name.data, email=form.email.data, password=form.password.data)
         db.session.add(new_user)
         db.session.commit()
-        return '<h1>cree un usuario</h1>'
+        return redirect(url_for('institucion'))
     return render_template('register.html', form=form)
 
 @app.route('/login', methods=['POST','GET'])
@@ -132,21 +127,31 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             login_user(user)
-            return redirect(url_for('todo'))
+            return redirect(url_for('institucion'))
             #return 'me loguee'
         return "Invalid email or password!"
     
     return render_template('login.html', form=form)
 
-@app.route('/formulario', methods=['POST','GET'])
-def formulario():
+@app.route('/institucion', methods=['POST','GET'])
+def institucion():
     form = InstitucionForm()
     if form.validate_on_submit():
-        new_institucion = Institucion(name=form.name.data, departamento=form.departamento.data, ciudad=form.ciudad.data)
+        new_institucion = Institucion(name=form.name.data, departamento=form.departamento.data, ciudad=form.ciudad.data, user_id=current_user.id)
         db.session.add(new_institucion)
         db.session.commit()
         return '<h1>se creo una institucion</h1>'
-    return render_template('formulario.html', form=form)
+    return render_template('institucion.html', form=form)
+
+@app.route('/denuncia', methods=['POST','GET'])
+def denuncia():
+    form = DenunciaForm()
+    if form.validate_on_submit():
+        new_denuncia = Institucion(name=form.name.data, departamento=form.departamento.data, ciudad=form.ciudad.data, user_id=current_user.id)
+        db.session.add(new_denuncia)
+        db.session.commit()
+        return '<h1>se creo una denuncia jeje</h1>'
+    return render_template('denuncia.html', form=form)
 
 
 
