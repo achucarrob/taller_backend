@@ -18,30 +18,7 @@ class LoginForm(FlaskForm):
     password= PasswordField()
     submit=SubmitField('Logueate!')
 
-#Formularios
-class RegisterForm(FlaskForm):
-    name = StringField('name')
-    email=EmailField('email')
-    password=PasswordField('pass')
-    submit=SubmitField('Registrate!')
-
-class DenunciaForm(FlaskForm):
-    fecha = DateField('fecha')
-    categoria = StringField('categoria')
-    institucion = StringField('Institucion')
-    saneamiento = SelectField('Calidad de Saneamiento', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
-    instalacion_electrica = SelectField('Calidad de Instalacion Electrica', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
-    agua = SelectField('Calidad del agua', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
-    infraestructura = SelectField('Calidad de la infraestructura', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
-    mueblario = SelectField('Calidad del mueblario', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
-    internet = SelectField('Calidad del internet', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
-    submit = SubmitField('Enviar')
-
-class InstitucionForm(FlaskForm):
-    name = StringField('name')
-    departamento = StringField('departamento')
-    ciudad = StringField('ciudad')
-    submit = SubmitField('Enviar')
+    
 
 #Modelos
 class User (UserMixin, db.Model):
@@ -99,6 +76,30 @@ class Denuncias(db.Model):
     fecha = db.Column(db.Date(), nullable=False)
     institucion_id = db.Column(db.Integer, db.ForeignKey('institucion.id'))
 
+#Formularios
+class RegisterForm(FlaskForm):
+    name = StringField('name')
+    email=EmailField('email')
+    password=PasswordField('pass')
+    submit=SubmitField('Registrate!')
+
+class DenunciaForm(FlaskForm):
+    fecha = DateField('fecha')
+    categoria = StringField('categoria')
+    institucion = StringField('Institucion')
+    saneamiento = SelectField('Calidad de Saneamiento', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    instalacion_electrica = SelectField('Calidad de Instalacion Electrica', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    agua = SelectField('Calidad del agua', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    infraestructura = SelectField('Calidad de la infraestructura', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    mueblario = SelectField('Calidad del mueblario', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    internet = SelectField('Calidad del internet', choices=[('0', 'Muy malo'), ('1', 'Normal'), ('2', 'Excelente')])
+    submit = SubmitField('Enviar')
+
+class InstitucionForm(FlaskForm):
+    name = StringField('name')
+    departamento = StringField('departamento')
+    ciudad = StringField('ciudad')
+    submit = SubmitField('Enviar')
 
 #Crea la tablas, tiene que estar bajo las clases.
 with app.app_context():
@@ -147,7 +148,7 @@ def institucion():
 def denuncia():
     form = DenunciaForm()
     if form.validate_on_submit():
-        new_denuncia = Institucion(name=form.name.data, departamento=form.departamento.data, ciudad=form.ciudad.data, user_id=current_user.id)
+        new_denuncia = Denuncia(name=form.name.data, departamento=form.departamento.data, ciudad=form.ciudad.data, user_id=current_user.id)
         db.session.add(new_denuncia)
         db.session.commit()
         return '<h1>se creo una denuncia jeje</h1>'
